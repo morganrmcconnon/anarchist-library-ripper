@@ -1,6 +1,7 @@
 import requests
 import re
 from pathlib import Path
+from os.path import exists
 
 def get_texts(library):
     #Open library source file
@@ -20,7 +21,7 @@ def get_texts(library):
 def write_texts(library):
     texts_list = get_texts(library)
     text_len = len(texts_list)
-    print(f"Found {text_len} texts..")
+    print(f"Found {text_len} texts.. Downloading new texts.")
 
     current=1
 
@@ -32,15 +33,16 @@ def write_texts(library):
         title_pattern = "(?<=https:\/\/theanarchistlibrary\.org\/library\/).*?(?=\.pdf)"
         title = re.search(title_pattern,url)
         
-        #Save text to file
+        #Save text to file if file does not exist
         filepath = Path("files/"+title[0]+'.pdf')
-        filepath.parent.mkdir(parents=True, exist_ok=True)
-        response = requests.get(url)
-        filepath.write_bytes(response.content)
+        if exists(filepath) != True:
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+            response = requests.get(url)
+            filepath.write_bytes(response.content)
 
-        title = title[0].replace("-"," ")
-        print(f"Downloaded {title} ({current}/{text_len})")
-        current +=1
+            title = title[0].replace("-"," ")
+            print(f"Downloaded {title}")
+            current +=1
 
 def main():
     write_texts("https://theanarchistlibrary.org/library")
