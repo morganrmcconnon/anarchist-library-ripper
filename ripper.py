@@ -1,7 +1,7 @@
 import requests
 import re
 from pathlib import Path
-from os.path import exists
+import os
 
 def get_texts(library):
     #Open library source file
@@ -19,14 +19,21 @@ def get_texts(library):
     return texts_list
 
 def write_texts(library):
-    texts_list = get_texts(library)
-    text_len = len(texts_list)
-    print(f"Found {text_len} texts.. Downloading new texts.")
+    directory = "files/"
+    
+    #Check how many texts have already been downloaded and print result
+    text_count = len(library)
+    if (os.path.exists(directory)):
+        files = os.listdir(directory)
+        file_count = len(files)
+        print(f"Found {file_count} existing texts.. Downloading {text_count-file_count} new texts.")
+    else:
+        print(f"Found {text_count}.. Downloading texts.")
 
     current=1
 
     #Iterate upon list of texts
-    for text in texts_list:
+    for text in library:
         
         url = text+".pdf"
         #Get author and title from link
@@ -34,8 +41,9 @@ def write_texts(library):
         title = re.search(title_pattern,url)
         
         #Save text to file if file does not exist
-        filepath = Path("files/"+title[0]+'.pdf')
-        if exists(filepath) != True:
+        filepath = Path(directory+title[0]+'.pdf')
+        
+        if os.path.exists(filepath) != True:
             filepath.parent.mkdir(parents=True, exist_ok=True)
             response = requests.get(url)
             filepath.write_bytes(response.content)
@@ -44,8 +52,9 @@ def write_texts(library):
             print(f"Downloaded {title}")
             current +=1
 
-def main():
-    write_texts("https://theanarchistlibrary.org/library")
+def main(): 
+    texts_list = get_texts("https://theanarchistlibrary.org/library")
+    write_texts(texts_list)
 
 if __name__ == "__main__":
     main()
