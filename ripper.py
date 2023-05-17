@@ -26,6 +26,9 @@ def write_texts(library):
     if (os.path.exists(directory)):
         files = os.listdir(directory)
         file_count = len(files)
+        if text_count - file_count == 0:
+            print(f"Found {file_count} existing texts.. No new texts to download.")
+            return
         print(f"Found {file_count} existing texts.. Downloading {text_count-file_count} new texts.")
     else:
         print(f"Found {text_count}.. Downloading texts.")
