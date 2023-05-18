@@ -3,6 +3,9 @@ import re
 from pathlib import Path
 import os
 
+DIRECTORY = "files/"
+
+#Gets source file of library page to extract text names
 def get_texts(library):
     #Open library source file
     source = requests.get(library).content
@@ -18,21 +21,23 @@ def get_texts(library):
     texts_list.pop(1)
     return texts_list
 
-def write_texts(library):
-    directory = "files/"
-    
-    #Check how many texts have already been downloaded and print result
-    text_count = len(library)
-    if (os.path.exists(directory)):
-        files = os.listdir(directory)
+#Get current count of downloaded texts and determine how many new texts script needs to download
+def count_current(text_count):
+    if (os.path.exists(DIRECTORY)):
+        files = os.listdir(DIRECTORY)
         file_count = len(files)
+        #If all texts are downloaded, exit script early
         if text_count - file_count == 0:
             print(f"Found {file_count} existing texts.. No new texts to download.")
-            return
+            return file_count
         print(f"Found {file_count} existing texts.. Downloading {text_count-file_count} new texts.")
+        return file_count
     else:
         print(f"Found {text_count}.. Downloading texts.")
+        return file_count
 
+#Downloads and saves texts that are not already saved
+def write_texts(library):
     current=1
 
     #Iterate upon list of texts
@@ -44,7 +49,7 @@ def write_texts(library):
         title = re.search(title_pattern,url)
         
         #Save text to file if file does not exist
-        filepath = Path(directory+title[0]+'.pdf')
+        filepath = Path(DIRECTORY+title[0]+'.pdf')
         
         if os.path.exists(filepath) != True:
             filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -56,8 +61,11 @@ def write_texts(library):
             current +=1
 
 def main(): 
-    texts_list = get_texts("https://theanarchistlibrary.org/library")
-    write_texts(texts_list)
+    library = get_texts("https://theanarchistlibrary.org/library")
+    text_count = len(library)
+    file_count = count_current(text_count)
+    if text_count - file_count != 0:
+        write_texts(library)
 
 if __name__ == "__main__":
     main()
