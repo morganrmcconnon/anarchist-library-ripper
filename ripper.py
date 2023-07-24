@@ -32,7 +32,7 @@ def count_current(text_count):
         print(f"Found {file_count} existing texts.. Downloading {text_count-file_count} new texts to {DIRECTORY}.")
         return file_count
     else:
-        print(f"Found {text_count}.. Downloading texts to {DIRECTORY}.")
+        print(f"Found {text_count} texts on Anarchist Library.. Downloading texts to {DIRECTORY}.")
         return 0
 
 #Downloads and saves texts that are not already saved
@@ -63,6 +63,9 @@ def main():
     DIRECTORY = "texts/"
     if len(sys.argv) == 2:
         DIRECTORY = sys.argv[1] + "/"
+    if len(sys.argv) > 2:
+        print("Unsupported variable length. To save texts in custom folder, execute 'ripper.py [folder]'")
+        return
     library = get_texts("https://theanarchistlibrary.org/library")
     text_count = len(library)
     file_count = count_current(text_count)
