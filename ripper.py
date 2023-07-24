@@ -2,8 +2,7 @@ import requests
 import re
 from pathlib import Path
 import os
-
-DIRECTORY = "files/"
+import sys
 
 #Gets source file of library page to extract text names
 def get_texts(library):
@@ -30,11 +29,11 @@ def count_current(text_count):
         if text_count - file_count == 0:
             print(f"Found {file_count} existing texts.. No new texts to download.")
             return file_count
-        print(f"Found {file_count} existing texts.. Downloading {text_count-file_count} new texts.")
+        print(f"Found {file_count} existing texts.. Downloading {text_count-file_count} new texts to {DIRECTORY}.")
         return file_count
     else:
-        print(f"Found {text_count}.. Downloading texts.")
-        return file_count
+        print(f"Found {text_count}.. Downloading texts to {DIRECTORY}.")
+        return 0
 
 #Downloads and saves texts that are not already saved
 def write_texts(library):
@@ -42,7 +41,6 @@ def write_texts(library):
 
     #Iterate upon list of texts
     for text in library:
-        
         url = text+".pdf"
         #Get author and title from link
         title_pattern = "(?<=https:\/\/theanarchistlibrary\.org\/library\/).*?(?=\.pdf)"
@@ -61,6 +59,10 @@ def write_texts(library):
             current +=1
 
 def main(): 
+    global DIRECTORY
+    DIRECTORY = "texts/"
+    if len(sys.argv) == 2:
+        DIRECTORY = sys.argv[1] + "/"
     library = get_texts("https://theanarchistlibrary.org/library")
     text_count = len(library)
     file_count = count_current(text_count)
